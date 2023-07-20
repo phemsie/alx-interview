@@ -1,29 +1,44 @@
 #!/usr/bin/python3
-"""Log parsing reads a stdin line by line and computes metrics"""
-
-import fileinput
-from typing import List
+"""Log Parser"""
+import sys
 
 
-line_count = 0
-total_size = 0
-status_codes = {200: 0, 301: 0, 400: 0, 401: 0, 403: 0, 404: 0, 405: 0, 500: 0}
+if __name__ == '__main__':
+    file_size = [0]
+    status_codes = {200: 0, 301: 0, 400: 0, 401: 0,
+                    403: 0, 404: 0, 405: 0, 500: 0}
 
-for line in fileinput.input():
-    ln = line.split()
-
-    if len(ln) != 9:
-        continue
-
-    line_count += 1
-    total_size += int(ln[8])
-
-    if int(ln[7]) in status_codes.keys():
-        status_codes[int(ln[7])] += 1
-    if line_count == 10:
-        print("File size: {}".format(total_size))
+    def print_stats():
+        """ Print statistics """
+        print('File size: {}'.format(file_size[0]))
         for key in sorted(status_codes.keys()):
-            print("{}: {}".format(key, status_codes[key]))
+            if status_codes[key]:
+                print('{}: {}'.format(key, status_codes[key]))
 
-        line_count = 0
-        total_size = 0
+    def parse_line(line):
+        """ Checks the line for matches """
+        try:
+            line = line[:-1]
+            word = line.split(' ')
+            # File size is last parameter on stdout
+            file_size[0] += int(word[-1])
+            # Status code comes before file size
+            status_code = int(word[-2])
+            # Move through dictionary of status codes
+            if status_code in status_codes:
+                status_codes[status_code] += 1
+        except BaseException:
+            pass
+
+    linenum = 1
+    try:
+        for line in sys.stdin:
+            parse_line(line)
+            """ print after every 10 lines """
+            if linenum % 10 == 0:
+                print_stats()
+            linenum += 1
+    except KeyboardInterrupt:
+        print_stats()
+        raise
+    print_stats()
