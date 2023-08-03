@@ -1,37 +1,70 @@
 #!/usr/bin/python3
-"""challenge of placing N non-attacking queens on an N×N chessboard"""
-import sys
+
+  """
+    Method: nqueens - place n queens
+            on an n by n board so that
+            no queens are attacking any
+            others.
+    Parameters: n is an int that sets
+                board size and # of queens
+    Return: All possible solutions to
+            placement, in list of lists 
+
+    """
 
 
-def nonAttack(brd, ln, i):
-    '''checks a place is not attacked by queens'''
-    for j in range(ln):
-        if(brd[j] == i or brd[j] + ln - j == i or brd[j] + j - ln == i):
+def nqueens(n):
+    """
+    This function solves the N queens problem 
+    """
+
+    if n < 4:
+        print("N must be at least 4")
+        exit(1)
+    if not isinstance(n, int):
+        print("N must be a number")
+        exit(1)
+
+    board = [[0 for i in range(n)] for j in range(n)]
+    solutions = []
+    solve(board, 0, solutions)
+    return solutions
+
+
+def solve(board, row, solutions):
+    """
+    This function recursively solves the N queens problems 
+    """
+
+    if row == n:
+        solutions.append(board[:])
+        return
+
+    for col in range(n):
+        if is_safe(board, row, col):
+            board[row][col] = 1
+            solve(board, row + 1, solutions)
+            board[row][col] = 0
+
+
+def is_safe(board, row, col):
+    """
+    This function checks if a queen can be placed in a given row or column
+    """
+
+    for i in range(row):
+        if board[i][col] == 1:
             return False
+
+    for i in range(row):
+        for j in range(n):
+            if board[i][j] == 1 and col - j == row - i or col + j == row - i:
+                return False
+
     return True
 
-
-def fillBoard(brd, ln):
-    '''finds the next safe posn to land the queen'''
-    for i in range(len(brd)):
-        if nonAttack(brd, ln, i):
-            brd[ln] = i
-            if ln < len(brd) - 1:
-                fillBoard(brd, ln + 1)
-            else:
-                print([[i, brd[i]] for i in range(len(brd))])
-
-
-if len(sys.argv) != 2:
-    print("Usage: nqueens N")
-    sys.exit(1)
-try:
-    n = int(sys.argv[1])
-except Exception:
-    print("N must be a number")
-    sys.exit(1)
-if n < 4:
-    print("N must be at least 4")
-    sys.exit(1)
-brd = [-1 for i in range(n)]
-fillBoard(brd, 0)
+if __name__ == "__main__":
+    n = int(input("Enter N: "))
+    solutions = nqueens(n)
+    for solution in solutions:
+        print(solution))
