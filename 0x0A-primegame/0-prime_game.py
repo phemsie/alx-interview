@@ -1,53 +1,49 @@
 #!/usr/bin/python3
-"""Module defines game of primes"""
+
+""" Prime Game """
 
 
-def isPrime(n):
-    '''checks n is prime or not'''
-    if n == 1:
-        return False
-    if n == 2:
-        return True
-    d = n // 2 + 1
-    while d > 1:
-        if n % d == 0:
+def check_prime(n):
+    """ Check if n is a prime number """
+    for i in range(2, int(n ** 0.5) + 1):
+        if not n % i:
             return False
-        d = d - 1
     return True
 
 
-def gameWinner(x, nums):
-    '''returns the round winner'''
-    count = 0
-    try:
-        if x < 1 and len(nums) < 0:
-            return None
-        for p in range(x):
-            if isPrime(nums[p]):
-                count += 1
-    except Exception:
-        return None
-    if count % 2 == 0 or x == 1:
-        return "Ben"
-    return "Maria"
+def add_prime(n, primes):
+    """ Add prime to list """
+    last_prime = primes[-1]
+    if n > last_prime:
+        for i in range(last_prime + 1, n + 1):
+            if check_prime(i):
+                primes.append(i)
+            else:
+                primes.append(0)
 
 
 def isWinner(x, nums):
-    '''plays game of primes and returns the winner'''
-    Ben = 0
-    Maria = 0
-    game = None
-    for r in range(x):
-        numlist = []
-        for num in range(nums[r] + 1):
-            numlist.append(num + 1)
-        game = gameWinner(nums[r], numlist)
-        if game == "Ben":
-            Ben += 1
-        if game == "Maria":
-            Maria += 1
-    if Ben > Maria:
-        return "Ben"
-    if Maria > Ben:
+    """ x is the number of rounds and nums is an array of n
+    Return: name of the player that won the most rounds
+    If the winner cannot be determined, return None """
+
+    score = {"Maria": 0, "Ben": 0}
+    primes = [0, 0, 2]
+    add_prime(max(nums), primes)
+
+    for round in range(x):
+        _sum = sum((i != 0 and i <= nums[round])
+                   for i in primes[:nums[round] + 1])
+        if (_sum % 2):
+            winner = "Maria"
+        else:
+            winner = "Ben"
+        if winner:
+            score[winner] += 1
+
+    if score["Maria"] > score["Ben"]:
         return "Maria"
+    elif score["Ben"] > score["Maria"]:
+        return "Ben"
+
     return None
